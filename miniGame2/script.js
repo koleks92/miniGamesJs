@@ -5,11 +5,31 @@ const enemy = document.querySelector("#enemy");
 const gameBox = document.querySelector("#gameBox");
 const bullet = document.querySelector("#bullet");
 
+const pointsSpan = document.querySelector("#pointsSpan");
+const highscore = document.querySelector("#highscoreSpan");
+const startButton = document.querySelector("#start");
+const gameOverButton = document.querySelector("#gameOver");
+
+// Start/GameOver
+startButton.addEventListener("click", () => {
+  gameStart();
+  startButton.style.display = "none";
+});
+
+gameOverButton.addEventListener("click", () => {
+  gameStart();
+  gameOverButton.style.display = "none";
+});
+
+// Points
+let points = 0;
+highscore.textContent = localStorage.getItem("highscore");
+
 // CONSTANTS
 // Player speed
-const playerSpeed = 1;
+const playerSpeed = 2;
 // Barrel max angles
-const maxUp = -90;
+const maxUp = -180;
 const maxDown = 0;
 // Max shoot length
 const maxLength = Math.hypot(gameBox.clientHeight, gameBox.clientWidth);
@@ -18,8 +38,13 @@ const maxLength = Math.hypot(gameBox.clientHeight, gameBox.clientWidth);
 // Keep a value between a minimum and a maximum
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
-// Current angle
-let currentAngle = 0;
+// Variables 
+let currentAngle = 0;  // Barrel angle
+let enemyY = 0;       // Enemy position Y axis
+let speedEnemy = 1;   // Enemy speed
+let speedInterval;    // Enemy speed interval
+let bulletAnim;      // Bullet animation 
+
 
 // Read positions in one place
 const getLeft = (item) => parseFloat(item.style.left) || 0;
@@ -71,16 +96,40 @@ document.addEventListener("keyup", (e) => {
   }
 });
 
-// Shoot function
+
 function shoot(angle, length) {
-  // Get the shoot line
-  // 1. Convert to radians
-  const angleRadians = angle * (Math.PI / 180);
+  bulletAnim?.cancel(); // returns bullet to its start
 
-  const dx = length * Math.cos(angleRadians);
-  const dy = length * Math.sin(angleRadians); 
+  const box = gameBox.getBoundingClientRect();
+  const b = bullet.getBoundingClientRect();
 
-  bullet.animate(
+  // Start: bullet center, in screen coordinates
+  const startX = b.left + b.width / 2;
+  const startY = b.top + b.height / 2;
+
+  const rad = angle * (Math.PI / 180);
+  const cos = Math.cos(rad);
+  const sin = Math.sin(rad);
+
+  let dx = length * cos;
+  let dy = length * sin;
+
+  // scale = 1 means the full path fits; smaller means cut it down
+  let scale = 1;
+
+  const endX = startX + dx;
+  const endY = startY + dy;
+
+  if (endX > box.right) scale = Math.min(scale, (box.right - startX) / dx);
+  if (endX < box.left) scale = Math.min(scale, (box.left - startX) / dx);
+  if (endY > box.bottom) scale = Math.min(scale, (box.bottom - startY) / dy);
+  if (endY < box.top) scale = Math.min(scale, (box.top - startY) / dy);
+
+  // Shrink BOTH by the same amount, so the direction is preserved
+  dx *= scale;
+  dy *= scale;
+
+  bulletAnim = bullet.animate(
     [
       { transform: "translate(0px, 0px)" },
       { transform: `translate(${dx}px, ${dy}px)` },
@@ -88,8 +137,62 @@ function shoot(angle, length) {
     { duration: 500, easing: "linear", fill: "forwards" },
   );
 
-  // Move along the shoot line
-  //
+  bulletAnim.onfinish = () => {
+    bulletAnim.cancel(); // removes the animation, bullet goes back to start
+  };
+}
+
+// Colision check function
+function collisionCheck() {
+  const bulletRect = bullet.getBoundingClientRect();
+  const enemyRect = enemy.getBoundingClientRect();
+
+  // Enemy bottom
+  const enemyX = enemyRect.x;
+  const enemyX2 = enemyRect.x + enemyRect.width;
+
+  // Enemy sides
+  const enemyY = enemyRect.y;
+  const enemyY2 = enemyRect.y + enemyRect.height;
+
+  if (
+    bulletRect.x >= enemyX &&
+    bulletRect.x <= enemyX2 &&
+    bulletRect.y >= enemyY &&
+    bulletRect.y <= enemyY2
+  ) {
+    return true;
+  }
+}
+
+
+
+// Move enemy along y axis
+function moveEnemy(speed) {
+  enemyY += speed;
+  enemy.style.top = enemyY + "px";
+
+  if (enemyY >= gameBox.clientHeight - enemy.offsetHeight) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
+// Respawn the enemy
+function respawnEnemy() {
+  // Reset enemyY
+  enemyY = 0;
+
+  // Min and max x for new enemy
+  const min = 0;
+  const max = gameBox.clientWidth - enemy.offsetWidth;
+
+  // Generate random x
+  const randomX = Math.floor(Math.random() * (max - min + 1)) + min;
+
+  // Move enemy
+  enemy.style.left = randomX + "px";
 }
 
 // Main animation loop
@@ -101,7 +204,42 @@ function animate() {
     }
   });
 
+  if (!moveEnemy(speedEnemy)) {
+    if (points > localStorage.getItem("highscore")) {
+      localStorage.setItem("highscore", parseInt(points));
+      highscore.textContent = parseInt(points);
+    }
+    gameOverButton.style.display = "flex";
+    clearInterval(speedInterval);
+    console.log("Game Over!");
+    return;
+  }
+
+  // Collision check
+  if (collisionCheck()) {
+    // Respawn enemy
+    respawnEnemy();
+    // Add points
+    points++;
+    pointsSpan.textContent = parseInt(points);
+  }
+
   requestAnimationFrame(animate);
 }
 
-requestAnimationFrame(animate);
+function gameStart() {
+  // Spawn enemy
+  respawnEnemy();
+
+  // Reset points and speed
+  points = 0;
+  speedEnemy = 1;
+
+  // Start speed interval
+  speedInterval = setInterval(() => {
+    speedEnemy += 0.5;
+  }, 10000);
+
+  // Start animation
+  requestAnimationFrame(animate);
+}

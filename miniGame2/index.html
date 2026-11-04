@@ -9,22 +9,25 @@
   <body>
     <div id="wrapper">
       <section id="top">
-        <h1>Shoot the other</h1>
-        <h2>Shoot the other to win !</h2>
-        <h3>Use the arrows to control your box</h3>
+        <h1>Red is Bad</h1>
+        <h2>Shoot the red square to gain points !</h2>
+        <h3>Use left and right arrows to control your box</h3>
+        <h3>Use up and down arrows to control the barrel</h3>
         <h3>Space to shoot</h3>
+                <p id="points">Points <span id="pointsSpan">0</span></p>
+        <p id="highscore">Highscore: <span id="highscoreSpan"></span></p>
       </section>
       <div id="gameBox">
-        <!-- <div id="start"><p>Start</p></div>
+        <div id="start"><p>Start</p></div>
         <div id="gameOver">
           <p>Game Over</p>
           <p>Click here to start again!</p>
-        </div> -->
-        <div id="player">
-          <div id="barrel">
-            <div id="bullet"></div>
-          </div>
         </div>
+        <div id="player">
+          <div id="barrel"></div>
+          <div id="bullet"></div>
+        </div>
+        <div id="enemy"></div>
       </div>
     </div>
     <script src="./script.js"></script>
