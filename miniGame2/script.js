@@ -23,7 +23,7 @@ gameOverButton.addEventListener("click", () => {
 
 // Points
 let points = 0;
-highscore.textContent = localStorage.getItem("highscore");
+highscore.textContent = localStorage.getItem("highscore_2");
 
 // CONSTANTS
 // Player speed
@@ -205,8 +205,8 @@ function animate() {
   });
 
   if (!moveEnemy(speedEnemy)) {
-    if (points > localStorage.getItem("highscore")) {
-      localStorage.setItem("highscore", parseInt(points));
+    if (points > localStorage.getItem("highscore_2")) {
+      localStorage.setItem("highscore_2", parseInt(points));
       highscore.textContent = parseInt(points);
     }
     gameOverButton.style.display = "flex";
