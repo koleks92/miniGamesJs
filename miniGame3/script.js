@@ -1,15 +1,21 @@
-const player = document.querySelector("#player");
+// const player = document.querySelector("#player");
 
 // Constants
 const GAME_WIDTH = 800;
 const SCALE = 1;
+const CRATE_SIZE = 60;
+const playerX = 100; // fixed screen position, the world scrolls past
+const playerW = 120;
+const playerH = 100;
 
 //Canvas/Images
 const c = document.querySelector("#background");
 const ctx = c.getContext("2d");
-const img = new Image();
-const img2 = new Image();
 
+const bg1 = new Image();
+const bg2 = new Image();
+const crate = new Image();
+const player = new Image();
 
 // Kepp track of images loaded
 let loaded = 0;
@@ -17,6 +23,8 @@ let loaded = 0;
 let bgX = 0;
 let speed = 3;
 let jumping = false;
+let y = 0; // 0 = on the ground, negative = in the air
+const jumpHeight = 150;
 
 // Helper functions
 // wraps any number into the range -w to 0, in both directions
@@ -30,43 +38,33 @@ const moveRight = () => {
   bgX -= speed;
 };
 
-// Jump functions
 const jump = () => {
-  if (!jumping) {
-    jumping = true;
-    y = 0;
-    jumpHeight = 150;
+  if (jumping) return;
+  jumping = true;
 
-    // Up
-    function up() {
-      const step = (jumpHeight - Math.abs(y)) * 0.1 + 1;
-      y -= step;
-      player.style.transform = `translateY(${y}px)`;
+  function up() {
+    const step = (jumpHeight - Math.abs(y)) * 0.1 + 1;
+    y = Math.max(y - step, -jumpHeight); // clamp so it never overshoots the top
 
-      if (y > -jumpHeight) {
-        requestAnimationFrame(up);
-      } else {
-        requestAnimationFrame(down);
-      }
-    }
-
-    requestAnimationFrame(up);
-
-    // Down
-    function down() {
-      const step = (jumpHeight - Math.abs(y)) * 0.1 + 1;
-      y += step;
-      player.style.transform = `translateY(${y}px)`;
-
-      if (y <= 0) {
-        requestAnimationFrame(down);
-      } else {
-        player.style.transform = `translateY(0px)`;
-        jumping = false;
-        return;
-      }
+    if (y > -jumpHeight) {
+      requestAnimationFrame(up);
+    } else {
+      requestAnimationFrame(down);
     }
   }
+
+  function down() {
+    const step = (jumpHeight - Math.abs(y)) * 0.1 + 1;
+    y = Math.min(y + step, 0); // clamp so it never sinks below the ground
+
+    if (y < 0) {
+      requestAnimationFrame(down);
+    } else {
+      jumping = false; // landed
+    }
+  }
+
+  requestAnimationFrame(up);
 };
 
 // Keyboard buttons
@@ -89,16 +87,22 @@ document.addEventListener("keyup", (e) => {
   }
 });
 
+// Obstacles
+const obstacles = [
+  { x: 400, y: -CRATE_SIZE, w: CRATE_SIZE, h: CRATE_SIZE },
+  { x: 400 + CRATE_SIZE, y: -CRATE_SIZE, w: CRATE_SIZE, h: CRATE_SIZE },
+  { x: 400 + CRATE_SIZE, y: -(CRATE_SIZE * 2), w: CRATE_SIZE, h: CRATE_SIZE },
+];
 
 function onImageLoaded() {
   loaded++;
-  if (loaded !== 2) return;
+  if (loaded !== 4) return;
 
   // Images widths and heights
-  const w1 = img.width * SCALE; // bottom image (slow layer)
-  const h1 = img.height * SCALE;
-  const w2 = img2.width * SCALE; // top image (full speed)
-  const h2 = img2.height * SCALE;
+  const w1 = bg1.width * SCALE; // bottom image (slow layer)
+  const h1 = bg1.height * SCALE;
+  const w2 = bg2.width * SCALE; // top image (full speed)
+  const h2 = bg2.height * SCALE;
 
   // Canvas / game width and height
   c.width = GAME_WIDTH;
@@ -125,8 +129,17 @@ function onImageLoaded() {
     ctx.clearRect(0, 0, c.width, c.height);
 
     // Draw top and bottom
-    drawLayer(img2, w2, h2, 0, offset1);
-    drawLayer(img, w1, h1, h2, offset2);
+    drawLayer(bg2, w2, h2, 0, offset1);
+    drawLayer(bg1, w1, h1, h2, offset2);
+
+    // Draw obstacles
+    obstacles.forEach((o) => {
+      const screenX = bgX + o.x;
+      ctx.drawImage(crate, screenX, o.y + h2, o.w, o.h);
+    });
+
+    // Draw the player
+    ctx.drawImage(player, playerX, h2 - playerH + y, playerW, playerH);
 
     requestAnimationFrame(gameLoop);
   }
@@ -135,8 +148,12 @@ function onImageLoaded() {
 }
 
 // Load images
-img.onload = onImageLoaded;
-img2.onload = onImageLoaded;
+bg1.onload = onImageLoaded;
+bg2.onload = onImageLoaded;
+crate.onload = onImageLoaded;
+player.onload = onImageLoaded;
 
-img.src = "./images/mario_bg_bottom.jpg";
-img2.src = "./images/mario_bg_top.jpg";
+bg1.src = "./images/mario_bg_bottom.jpg";
+bg2.src = "./images/mario_bg_top.jpg";
+crate.src = "./images/crate.png";
+player.src = "./images/c_stand.png";
