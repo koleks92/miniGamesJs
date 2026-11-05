@@ -3,7 +3,7 @@
 // Constants
 const GAME_WIDTH = 800;
 const SCALE = 1;
-const CRATE_SIZE = 60;
+const CRATE_SIZE = 80;
 const playerX = 100; // fixed screen position, the world scrolls past
 const playerW = 120;
 const playerH = 100;
@@ -157,3 +157,11 @@ bg1.src = "./images/mario_bg_bottom.jpg";
 bg2.src = "./images/mario_bg_top.jpg";
 crate.src = "./images/crate.png";
 player.src = "./images/c_stand.png";
+
+
+// TODO
+// - Animations, jumpt, run etc.
+// - Obstacle avoidance
+// - Enemies
+// - Princess
+// - Points
