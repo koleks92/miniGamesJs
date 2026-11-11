@@ -1,9 +1,9 @@
-// const player = document.querySelector("#player");
+import { obstacles, spikes } from "./data.js";
+import { wrap } from "./helpers.js";
 
 // Constants
 const GAME_WIDTH = 800;
 const SCALE = 1;
-const CRATE_SIZE = 80;
 const playerX = 100; // fixed screen position, the world scrolls past
 const playerW = 120;
 const playerH = 100;
@@ -20,6 +20,7 @@ const imgSources = {
   playerJumping: "./images/c_jump.png",
   playerRunning1: "./images/c_run1.png",
   playerRunning2: "./images/c_run2.png",
+  spikes: "./images/spikes.png",
 };
 
 // Images object
@@ -50,10 +51,6 @@ let running = false;
 let playerImageSrc;
 let y = 0; // 0 = on the ground, negative = in the air
 const jumpHeight = 150;
-
-// Helper functions
-// wraps any number into the range -w to 0, in both directions
-const wrap = (value, w) => (((value % w) + w) % w) - w;
 
 // Moving functions
 const moveLeft = () => {
@@ -97,22 +94,6 @@ document.addEventListener("keyup", (e) => {
     running = false;
   }
 });
-
-// Obstacles
-const obstacles = [
-  { x: 4 * CRATE_SIZE, y: -CRATE_SIZE, w: CRATE_SIZE, h: CRATE_SIZE },
-  { x: 5 * CRATE_SIZE, y: -CRATE_SIZE, w: CRATE_SIZE, h: CRATE_SIZE },
-  { x: 5 * CRATE_SIZE, y: -(CRATE_SIZE * 2), w: CRATE_SIZE, h: CRATE_SIZE },
-  { x: 8 * CRATE_SIZE, y: -CRATE_SIZE, w: CRATE_SIZE, h: CRATE_SIZE },
-  { x: 8 * CRATE_SIZE, y: -(CRATE_SIZE * 2), w: CRATE_SIZE, h: CRATE_SIZE },
-  { x: 9 * CRATE_SIZE, y: -CRATE_SIZE, w: CRATE_SIZE, h: CRATE_SIZE },
-  { x: 15 * CRATE_SIZE, y: -CRATE_SIZE, w: CRATE_SIZE, h: CRATE_SIZE },
-  { x: 16 * CRATE_SIZE, y: -CRATE_SIZE, w: CRATE_SIZE, h: CRATE_SIZE },
-  { x: 16 * CRATE_SIZE, y: -(CRATE_SIZE * 2), w: CRATE_SIZE, h: CRATE_SIZE },
-  { x: 17 * CRATE_SIZE, y: -CRATE_SIZE, w: CRATE_SIZE, h: CRATE_SIZE },
-  { x: 17 * CRATE_SIZE, y: -(CRATE_SIZE * 2), w: CRATE_SIZE, h: CRATE_SIZE },
-  { x: 17 * CRATE_SIZE, y: -(CRATE_SIZE * 3), w: CRATE_SIZE, h: CRATE_SIZE },
-];
 
 // Check if a and b positions overlaps
 function overlaps(a, b) {
@@ -221,6 +202,12 @@ function onImageLoaded() {
     obstacles.forEach((o) => {
       const screenX = bgX + o.x;
       ctx.drawImage(images.crate, screenX, o.y + h2, o.w, o.h);
+    });
+
+    // Draw spikes
+    spikes.forEach((s) => {
+      const screenX = bgX + s.x;
+      ctx.drawImage(images.spikes, screenX, s.y + h2, s.w, s.h);
     });
 
     // Player image based on movement
