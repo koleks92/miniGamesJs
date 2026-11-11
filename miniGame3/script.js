@@ -3,7 +3,7 @@
 // Constants
 const GAME_WIDTH = 800;
 const SCALE = 1;
-const CRATE_SIZE = 100;
+const CRATE_SIZE = 80;
 const playerX = 100; // fixed screen position, the world scrolls past
 const playerW = 120;
 const playerH = 100;
@@ -42,7 +42,10 @@ let loaded = 0;
 // Images x in the canvas ( moving )
 let bgX = 0;
 let speed = 3;
-let jumping = false;
+let vy = 0;
+let onGround = true;
+const gravity = 0.6;
+const jumpSpeed = 12;
 let running = false;
 let playerImageSrc;
 let y = 0; // 0 = on the ground, negative = in the air
@@ -61,32 +64,10 @@ const moveRight = () => {
 };
 
 const jump = () => {
-  if (jumping) return;
-  jumping = true;
+  if (!onGround) return;
 
-  function up() {
-    const step = (jumpHeight - Math.abs(y)) * 0.1 + 1;
-    y = Math.max(y - step, -jumpHeight); // clamp so it never overshoots the top
-
-    if (y > -jumpHeight) {
-      requestAnimationFrame(up);
-    } else {
-      requestAnimationFrame(down);
-    }
-  }
-
-  function down() {
-    const step = (jumpHeight - Math.abs(y)) * 0.1 + 1;
-    y = Math.min(y + step, 0); // clamp so it never sinks below the ground
-
-    if (y < 0) {
-      requestAnimationFrame(down);
-    } else {
-      jumping = false; // landed
-    }
-  }
-
-  requestAnimationFrame(up);
+  onGround = false;
+  vy = -jumpSpeed;
 };
 
 // Keyboard buttons
@@ -137,9 +118,9 @@ function onImageLoaded() {
   if (loaded !== totalImages) return;
 
   // Images widths and heights
-  const w1 = images.bg1.width * SCALE; // bottom image (full speed)
+  const w1 = images.bg1.width * SCALE;
   const h1 = images.bg1.height * SCALE;
-  const w2 = images.bg2.width * SCALE; // top image (slow layer)
+  const w2 = images.bg2.width * SCALE;
   const h2 = images.bg2.height * SCALE;
 
   // Check if player and obsctacls collide
@@ -178,6 +159,15 @@ function onImageLoaded() {
     frameCount += 0.5;
     let runIndex = Math.floor(frameCount / frameDelay) % 2 ? 0 : 1;
 
+    // Gravity
+    vy += gravity;
+    y += vy;
+    if (y >= 0) {
+      y = 0;
+      vy = 0;
+      onGround = true;
+    }
+
     // Background speeds
     const offset2 = wrap(bgX, w2);
     const offset1 = wrap(bgX * 0.5, w1);
@@ -196,11 +186,11 @@ function onImageLoaded() {
     });
 
     // Player image based on movement
-    if (jumping) {
+    if (!onGround) {
       playerImageSrc = images.playerJumping;
-    } else if (running && !jumping) {
+    } else if (running) {
       playerImageSrc = runFrames[runIndex];
-    } else if (!running && !jumping) {
+    } else {
       playerImageSrc = images.player;
     }
 
