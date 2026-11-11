@@ -132,7 +132,7 @@ function onImageLoaded() {
       h: playerH,
     };
 
-    return obstacles.some((o) => {
+    return obstacles.find((o) => {
       const crateBox = { x: bgX + o.x, y: o.y + h2, w: o.w, h: o.h };
       return overlaps(playerBox, crateBox);
     });
@@ -159,6 +159,20 @@ function onImageLoaded() {
     frameCount += 0.5;
     let runIndex = Math.floor(frameCount / frameDelay) % 2 ? 0 : 1;
 
+    // Collision
+    const oldBgX = bgX;
+
+    const oldY = y;
+
+    // Buttons control
+    Object.values(buttons).forEach((button) => {
+      if (button.pressed) button.func();
+    });
+
+    if (collides()) {
+      bgX = oldBgX;
+    }
+
     // Gravity
     vy += gravity;
     y += vy;
@@ -166,6 +180,21 @@ function onImageLoaded() {
       y = 0;
       vy = 0;
       onGround = true;
+    } else {
+      onGround = false;
+    }
+
+    const hit = collides();
+
+    if (hit) {
+      if (vy > 0) {
+        y = hit.y;
+        vy = 0;
+        onGround = true;
+      } else {
+        v = oldY;
+        vy = 0;
+      }
     }
 
     // Background speeds
@@ -196,18 +225,6 @@ function onImageLoaded() {
 
     // Draw the player
     ctx.drawImage(playerImageSrc, playerX, h2 - playerH + y, playerW, playerH);
-
-    // Collision
-    const oldBgX = bgX;
-
-    // Buttons control
-    Object.values(buttons).forEach((button) => {
-      if (button.pressed) button.func();
-    });
-
-    if (collides()) {
-      bgX = oldBgX;
-    }
 
     requestAnimationFrame(gameLoop);
   }
