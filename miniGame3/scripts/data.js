@@ -16,6 +16,8 @@ export const obstacles = [
 ];
 
 export const spikes = [
-  { x: 6.5 * CRATE_SIZE, y: -CRATE_SIZE, w: CRATE_SIZE, h: CRATE_SIZE },
+  { x: 6 * CRATE_SIZE, y: -CRATE_SIZE, w: CRATE_SIZE, h: CRATE_SIZE },
+  { x: 7 * CRATE_SIZE, y: -CRATE_SIZE, w: CRATE_SIZE, h: CRATE_SIZE },
+
   { x: 18 * CRATE_SIZE, y: -CRATE_SIZE, w: CRATE_SIZE, h: CRATE_SIZE },
 ];
