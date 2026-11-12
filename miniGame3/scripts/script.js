@@ -1,4 +1,4 @@
-import { obstacles, spikes } from "./data.js";
+import { obstacles, spikes, potter, chips } from "./data.js";
 import { wrap } from "./helpers.js";
 
 // Constants
@@ -21,6 +21,8 @@ const imgSources = {
   playerRunning1: "./images/c_run1.png",
   playerRunning2: "./images/c_run2.png",
   spikes: "./images/spikes.png",
+  potter: "./images/jasiu_potter.png",
+  chip: "./images/chip.png",
 };
 
 // Images object
@@ -51,6 +53,12 @@ let running = false;
 let playerImageSrc;
 let y = 0; // 0 = on the ground, negative = in the air
 const jumpHeight = 150;
+// Dead
+let dead = false;
+
+// Chips
+let remainingChips = [...chips];
+let collectedChips = 0;
 
 // Moving functions
 const moveLeft = () => {
@@ -113,8 +121,8 @@ function onImageLoaded() {
   const w2 = images.bg2.width * SCALE;
   const h2 = images.bg2.height * SCALE;
 
-  // Check if player and obsctacls collide
-  function collides() {
+  // Check if player and objects collide
+  function collides(objects) {
     const playerBox = {
       x: playerX,
       y: h2 - playerH + y,
@@ -122,9 +130,9 @@ function onImageLoaded() {
       h: playerH,
     };
 
-    return obstacles.find((o) => {
-      const crateBox = { x: bgX + o.x, y: o.y + h2, w: o.w, h: o.h };
-      return overlaps(playerBox, crateBox);
+    return objects.find((o) => {
+      const objectBox = { x: bgX + o.x, y: o.y + h2, w: o.w, h: o.h };
+      return overlaps(playerBox, objectBox);
     });
   }
 
@@ -149,42 +157,70 @@ function onImageLoaded() {
     frameCount += 0.5;
     let runIndex = Math.floor(frameCount / frameDelay) % 2 ? 0 : 1;
 
-    // Collision
+    // Gravity runs in both states (alive and dead)
     const oldBgX = bgX;
-
     const oldY = y;
 
-    // Buttons control
-    Object.values(buttons).forEach((button) => {
-      if (button.pressed) button.func();
-    });
+    if (!dead) {
+      // X move
+      Object.values(buttons).forEach((button) => {
+        if (button.pressed) button.func();
+      });
 
-    if (collides()) {
-      bgX = oldBgX;
+      if (collides(obstacles)) {
+        bgX = oldBgX;
+      }
     }
 
-    // Gravity
+    // Y move
     vy += gravity;
     y += vy;
-    if (y >= 0) {
-      y = 0;
-      vy = 0;
-      onGround = true;
-    } else {
-      onGround = false;
-    }
 
-    const hit = collides();
-
-    if (hit) {
-      if (vy > 0) {
-        y = hit.y;
+    if (!dead) {
+      // Floor
+      if (y >= 0) {
+        y = 0;
         vy = 0;
         onGround = true;
       } else {
-        v = oldY;
-        vy = 0;
+        onGround = false;
       }
+
+      // Crates
+      const hit = collides(obstacles);
+      if (hit) {
+        if (vy > 0) {
+          y = hit.y;
+          vy = 0;
+          onGround = true;
+        } else if (vy < 0) {
+          y = oldY;
+          vy = 0;
+        }
+      }
+
+      // Spikes
+      if (collides(spikes)) {
+        dead = true;
+        onGround = false; // shows the jumping sprite
+        vy = -jumpSpeed / 2; // small hop, then gravity pulls it down
+      }
+
+      // Chips
+      const chip = collides(remainingChips);
+      if (chip) {
+        remainingChips = remainingChips.filter((item) => item !== chip);
+      }
+    }
+
+    // Restart once the player has fallen off the bottom of the canvas
+    if (dead && y > h1 + playerH) {
+      bgX = 0;
+      y = 0;
+      vy = 0;
+      dead = false;
+      onGround = true;
+      remainingChips = [...chips];
     }
 
     // Background speeds
@@ -198,6 +234,12 @@ function onImageLoaded() {
     drawLayer(images.bg2, w2, h2, 0, offset1);
     drawLayer(images.bg1, w1, h1, h2, offset2);
 
+    // Red tint over the background only (before crates, spikes, player)
+    if (dead) {
+      ctx.fillStyle = "#ff000080";
+      ctx.fillRect(0, 0, c.width, c.height);
+    }
+
     // Draw obstacles
     obstacles.forEach((o) => {
       const screenX = bgX + o.x;
@@ -208,6 +250,12 @@ function onImageLoaded() {
     spikes.forEach((s) => {
       const screenX = bgX + s.x;
       ctx.drawImage(images.spikes, screenX, s.y + h2, s.w, s.h);
+    });
+
+    // Draw chips
+    remainingChips.forEach((c) => {
+      const screenX = bgX + c.x;
+      ctx.drawImage(images.chip, screenX, c.y + h2, c.w, c.h);
     });
 
     // Player image based on movement
@@ -222,13 +270,17 @@ function onImageLoaded() {
     // Draw the player
     ctx.drawImage(playerImageSrc, playerX, h2 - playerH + y, playerW, playerH);
 
+    // Draw the princess
+    ctx.drawImage(
+      images.potter,
+      bgX + potter.x,
+      potter.y + h2,
+      potter.w,
+      potter.h,
+    );
+
     requestAnimationFrame(gameLoop);
   }
 
   requestAnimationFrame(gameLoop);
 }
-
-// TODO
-// - Obstacle avoidance
-// - Enemies
-// - Harry Potter !
