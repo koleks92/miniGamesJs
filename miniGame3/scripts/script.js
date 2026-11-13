@@ -44,11 +44,11 @@ Object.entries(imgSources).forEach(([name, path]) => {
 let loaded = 0;
 // Images x in the canvas ( moving )
 let bgX = 0;
-let speed = 3;
+let speed = 4;
 let vy = 0;
 let onGround = true;
 const gravity = 0.6;
-const jumpSpeed = 12;
+const jumpSpeed = 14;
 let running = false;
 let playerImageSrc;
 let y = 0; // 0 = on the ground, negative = in the air
