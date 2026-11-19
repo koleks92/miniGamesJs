@@ -12,5 +12,8 @@ export const imgSources = {
   spikes: "./images/spikes.png",
   potter: "./images/jasiu_potter.png",
   chip: "./images/chip.png",
-  cube: "./images/cube_left_1.png"
+  cube_left_1: "./images/cube_left_1.png",
+  cube_left_2: "./images/cube_left_2.png",
+  cube_right_1: "./images/cube_right_1.png",
+  cube_right_2: "./images/cube_right_2.png",
 };

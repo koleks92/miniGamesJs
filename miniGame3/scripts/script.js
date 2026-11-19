@@ -140,6 +140,10 @@ function onImageLoaded() {
   let frameCount = 0;
   const frameDelay = 8;
 
+  // Running cube
+  const leftCubeRun = [images.cube_left_1, images.cube_left_2];
+  const rightCubeRun = [images.cube_right_1, images.cube_right_2];
+
   function gameLoop() {
     // Increase frame counter for running animation
     frameCount += 0.5;
@@ -218,6 +222,17 @@ function onImageLoaded() {
     // Clear the canvas
     ctx.clearRect(0, 0, c.width, c.height);
 
+    // Move cubes, bounce off obstacles
+    cubes.forEach((cube) => {
+      const oldX = cube.x;
+      cube.x += cube.dir * 0.8;
+
+      if (obstacles.some((o) => overlaps(cube, o))) {
+        cube.x = oldX; // undo the move so it isn't stuck inside the crate
+        cube.dir *= -1; // flip direction
+      }
+    });
+
     // Draw top and bottom
     drawLayer(images.bg2, w2, h2, 0, offset1);
     drawLayer(images.bg1, w1, h1, h2, offset2);
@@ -247,11 +262,24 @@ function onImageLoaded() {
     });
 
     // Draw cubes
-    // TODO
-    cubes.forEach((c) => {
-      const screenX = bgX + c.x;
-      ctx.drawImage(images.cube, screenX, c.y + h2, c.w, c.h);
-      c.x += 0.5
+    cubes.forEach((cube) => {
+      if (cube.dir === 1) {
+        ctx.drawImage(
+          rightCubeRun[runIndex],
+          bgX + cube.x,
+          cube.y + h2,
+          cube.w,
+          cube.h,
+        );
+      } else {
+        ctx.drawImage(
+          leftCubeRun[runIndex],
+          bgX + cube.x,
+          cube.y + h2,
+          cube.w,
+          cube.h,
+        );
+      }
     });
 
     // Player image based on movement
