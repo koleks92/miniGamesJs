@@ -1,5 +1,6 @@
 const CRATE_SIZE = 80;
 
+// Objects
 export const obstacles = [
   { x: 4 * CRATE_SIZE, y: -CRATE_SIZE, w: CRATE_SIZE, h: CRATE_SIZE },
   { x: 5 * CRATE_SIZE, y: -CRATE_SIZE, w: CRATE_SIZE, h: CRATE_SIZE },
@@ -13,6 +14,13 @@ export const obstacles = [
   { x: 17 * CRATE_SIZE, y: -CRATE_SIZE, w: CRATE_SIZE, h: CRATE_SIZE },
   { x: 17 * CRATE_SIZE, y: -(CRATE_SIZE * 2), w: CRATE_SIZE, h: CRATE_SIZE },
   { x: 17 * CRATE_SIZE, y: -(CRATE_SIZE * 3), w: CRATE_SIZE, h: CRATE_SIZE },
+  { x: 23 * CRATE_SIZE, y: -CRATE_SIZE, w: CRATE_SIZE, h: CRATE_SIZE },
+  { x: 24 * CRATE_SIZE, y: -CRATE_SIZE, w: CRATE_SIZE, h: CRATE_SIZE },
+  { x: 24 * CRATE_SIZE, y: -(CRATE_SIZE * 2), w: CRATE_SIZE, h: CRATE_SIZE },
+{ x: 28 * CRATE_SIZE, y: -CRATE_SIZE, w: CRATE_SIZE, h: CRATE_SIZE },
+  { x: 29 * CRATE_SIZE, y: -CRATE_SIZE, w: CRATE_SIZE, h: CRATE_SIZE },
+  { x: 29 * CRATE_SIZE, y: -(CRATE_SIZE * 2), w: CRATE_SIZE, h: CRATE_SIZE },
+
 ];
 
 export const spikes = [
@@ -26,8 +34,12 @@ export let chips = [
   { x: 19 * CRATE_SIZE, y: -CRATE_SIZE * 5, w: CRATE_SIZE, h: CRATE_SIZE },
 ];
 
+export let cubes = [
+{ x: 25 * CRATE_SIZE, y: -CRATE_SIZE, w: CRATE_SIZE, h: CRATE_SIZE },
+];
+
 export const potter = {
-  x: 25 * CRATE_SIZE,
+  x: 35 * CRATE_SIZE,
   y: -CRATE_SIZE * 1.5,
   w: CRATE_SIZE * 1.5,
   h: CRATE_SIZE * 1.5,

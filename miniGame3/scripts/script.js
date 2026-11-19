@@ -1,5 +1,6 @@
-import { obstacles, spikes, potter, chips } from "./data.js";
+import { obstacles, spikes, potter, chips, cubes } from "./data.js";
 import { wrap } from "./helpers.js";
+import { imgSources } from "./images.js";
 
 // Constants
 const GAME_WIDTH = 800;
@@ -11,19 +12,6 @@ const playerH = 100;
 //Canvas/Images
 const c = document.querySelector("#background");
 const ctx = c.getContext("2d");
-
-const imgSources = {
-  bg1: "./images/mario_bg_bottom.jpg",
-  bg2: "./images/mario_bg_top.jpg",
-  crate: "./images/crate.png",
-  player: "./images/c_stand.png",
-  playerJumping: "./images/c_jump.png",
-  playerRunning1: "./images/c_run1.png",
-  playerRunning2: "./images/c_run2.png",
-  spikes: "./images/spikes.png",
-  potter: "./images/jasiu_potter.png",
-  chip: "./images/chip.png",
-};
 
 // Images object
 const images = {};
@@ -256,6 +244,14 @@ function onImageLoaded() {
     remainingChips.forEach((c) => {
       const screenX = bgX + c.x;
       ctx.drawImage(images.chip, screenX, c.y + h2, c.w, c.h);
+    });
+
+    // Draw cubes
+    // TODO
+    cubes.forEach((c) => {
+      const screenX = bgX + c.x;
+      ctx.drawImage(images.cube, screenX, c.y + h2, c.w, c.h);
+      c.x += 0.5
     });
 
     // Player image based on movement
