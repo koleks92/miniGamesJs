@@ -203,6 +203,13 @@ function onImageLoaded() {
       if (chip) {
         remainingChips = remainingChips.filter((item) => item !== chip);
       }
+
+      // Cubes
+      if (collides(cubes)) {
+        dead = true;
+        onGround = false;
+        vy = -jumpSpeed / 2; // small hop, then gravity pulls it down
+      }
     }
 
     // Restart once the player has fallen off the bottom of the canvas
