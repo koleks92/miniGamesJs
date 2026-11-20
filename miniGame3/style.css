@@ -63,32 +63,8 @@
 
 #background {
   display: block;
+  border: 2px solid black;
+  border-radius: 10px;
 }
 
-/* Player */
-#player {
-  position: absolute;
-  left: 30%;
-  bottom: 133px;
-  width: 50px;
-  height: 50px;
-  background-color: #999999;
-}
 
-#head {
-  position: relative;
-  background-color: black;
-  width: 25px;
-  height: 25px;
-  top: -50%;
-  left: 50%;
-  transform: translate(-50%);
-}
-
-/* Enemy */
-#enemy {
-  position: relative;
-  width: 25px;
-  height: 25px;
-  background-color: red;
-}
